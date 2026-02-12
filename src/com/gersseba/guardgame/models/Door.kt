@@ -1,6 +1,6 @@
 package com.gersseba.guardgame.models
 
-class Door(var x: Double, var y: Double, var isSafe: Boolean) {
+class Door(x: Double, y: Double, var isSafe: Boolean) : BaseModel(x,y) {
 
     fun open(): String {
         return if (isSafe) {
@@ -8,6 +8,10 @@ class Door(var x: Double, var y: Double, var isSafe: Boolean) {
         } else {
             "You opened the dangerous door!"
         }
+    }
+
+    override fun interact(player: Player): String {
+        return open()
     }
 
 }

@@ -1,35 +1,36 @@
-import korlibs.time.*
-import korlibs.korge.*
-import korlibs.korge.scene.*
-import korlibs.korge.tween.*
-import korlibs.korge.view.*
+import com.gersseba.guardgame.logic.Controls
+import com.gersseba.guardgame.models.Door
+import com.gersseba.guardgame.models.Guard
+import com.gersseba.guardgame.models.Player
+import com.gersseba.guardgame.models.World
+import com.gersseba.guardgame.representation.WorldRenderer
+import korlibs.event.*
 import korlibs.image.color.*
-import korlibs.image.format.*
-import korlibs.io.file.std.*
-import korlibs.math.geom.*
-import korlibs.math.interpolation.*
+import korlibs.korge.*
+import korlibs.korge.input.keys
+import korlibs.korge.view.*
+import korlibs.math.geom.Size
+import korlibs.time.timesPerSecond
 
-suspend fun main() = Korge(windowSize = Size(512, 512), backgroundColor = Colors["#2b2b2b"]) {
-	val sceneContainer = sceneContainer()
 
-	sceneContainer.changeTo { MyScene() }
-}
+suspend fun main() = Korge(windowSize = Size(500, 500), backgroundColor = Colors["#2b2b2b"]) {
+    val viewTiles = 25
+    val tileSize = width / viewTiles
 
-class MyScene : Scene() {
-	override suspend fun SContainer.sceneMain() {
-		val minDegrees = (-16).degrees
-		val maxDegrees = (+16).degrees
+    // --- MODEL LAYER ---
+    val world = World()
 
-		val image = image(resourcesVfs["korge.png"].readBitmap()) {
-			rotation = maxDegrees
-			anchor(.5, .5)
-			scale(0.8)
-			position(256, 256)
-		}
+    val renderer = WorldRenderer(this, 25, tileSize, world)
 
-		while (true) {
-			image.tween(image::rotation[minDegrees], time = 1.seconds, easing = Easing.EASE_IN_OUT)
-			image.tween(image::rotation[maxDegrees], time = 1.seconds, easing = Easing.EASE_IN_OUT)
-		}
-	}
+    // 3. Register entities
+    renderer.addEntity(world.player, Colors.BLUE)
+    world.guards.forEach { renderer.addEntity(it, Colors.RED) }
+    world.doors.forEach { renderer.addEntity(it, Colors.BROWN) }
+
+    Controls().registerKeyPress(this, world)
+
+    // Initial render
+    addFixedUpdater(30.timesPerSecond) {
+        renderer.update()
+    }
 }
