@@ -1,13 +1,9 @@
 import com.gersseba.guardgame.logic.Controls
-import com.gersseba.guardgame.models.Door
-import com.gersseba.guardgame.models.Guard
-import com.gersseba.guardgame.models.Player
 import com.gersseba.guardgame.models.World
 import com.gersseba.guardgame.representation.WorldRenderer
-import korlibs.event.*
+import com.gersseba.guardgame.ui.ChatBox
 import korlibs.image.color.*
 import korlibs.korge.*
-import korlibs.korge.input.keys
 import korlibs.korge.view.*
 import korlibs.math.geom.Size
 import korlibs.time.timesPerSecond
@@ -22,12 +18,14 @@ suspend fun main() = Korge(windowSize = Size(500, 500), backgroundColor = Colors
 
     val renderer = WorldRenderer(this, 25, tileSize, world)
 
+    val chatUI = ChatBox("Guard").addTo(parent = this).visible(false)
+
     // 3. Register entities
     renderer.addEntity(world.player, Colors.BLUE)
     world.guards.forEach { renderer.addEntity(it, Colors.RED) }
     world.doors.forEach { renderer.addEntity(it, Colors.BROWN) }
 
-    Controls().registerKeyPress(this, world)
+    Controls().registerKeyPress(this, chatUI, world)
 
     // Initial render
     addFixedUpdater(30.timesPerSecond) {
