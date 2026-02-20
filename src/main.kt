@@ -1,3 +1,5 @@
+import com.gersseba.guardgame.chat.ChatManager
+import com.gersseba.guardgame.chat.GeminiClient
 import com.gersseba.guardgame.logic.Controls
 import com.gersseba.guardgame.models.World
 import com.gersseba.guardgame.representation.WorldRenderer
@@ -18,14 +20,20 @@ suspend fun main() = Korge(windowSize = Size(500, 500), backgroundColor = Colors
 
     val renderer = WorldRenderer(this, 25, tileSize, world)
 
-    val chatUI = ChatBox("Guard").addTo(parent = this).visible(false)
+    val geminiClient = GeminiClient();
+    geminiClient.initConfig()
+
+    val chatUI = ChatBox().addTo(parent = this).visible(false)
+
+    val chatManager = ChatManager(chatUI, geminiClient)
+    chatUI.chatManager = chatManager
 
     // 3. Register entities
     renderer.addEntity(world.player, Colors.BLUE)
     world.guards.forEach { renderer.addEntity(it, Colors.RED) }
     world.doors.forEach { renderer.addEntity(it, Colors.BROWN) }
 
-    Controls().registerKeyPress(this, chatUI, world)
+    Controls().registerKeyPress(this, chatManager, world)
 
     // Initial render
     addFixedUpdater(30.timesPerSecond) {

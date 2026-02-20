@@ -1,5 +1,8 @@
 package com.gersseba.guardgame.ui
 
+import com.gersseba.guardgame.chat.ChatManager
+import com.gersseba.guardgame.chat.MessageSender
+import com.gersseba.guardgame.models.common.ChatMessage
 import korlibs.korge.annotations.KorgeExperimental
 import korlibs.korge.ui.*
 import korlibs.korge.view.*
@@ -8,11 +11,16 @@ import korlibs.math.geom.Size
 import kotlinx.coroutines.launch
 
 @OptIn(KorgeExperimental::class)
-class ChatBox(val npcName: String) : Container() {
+class ChatBox() : Container() {
     private val chatHistory = uiVerticalStack(width = 400.0)
     private lateinit var scrollable: UIScrollable
     private lateinit var background: View
+    private lateinit var title: UIText
     private var inputField: UITextInput? = null
+
+    lateinit var chatManager: ChatManager
+
+    var npcName: String = "Guard"
 
     init {
         // Listen to window size changes
@@ -51,7 +59,7 @@ class ChatBox(val npcName: String) : Container() {
         background = solidRect(stageWidth, stageHeight, Colors["#222222"].withAd(0.8))
 
         // 2. NPC Header
-        uiText("Talking to: $npcName") {
+        title = uiText("Talking to:") {
             position(margin, margin)
         }
 
@@ -69,34 +77,31 @@ class ChatBox(val npcName: String) : Container() {
             onReturnPressed {
                 val message = text
                 if (message.isNotBlank()) {
-                    sendMessage(message)
+                    chatManager.sendUserMessage(message)
                     text = "" // Clear input
                 }
             }
+            onEscPressed {
+                this@ChatBox.visible(false)
+            }
         }
 
-        addMessage("System", "Press Enter to send. ESC to close.")
     }
 
-    private fun addMessage(sender: String, text: String) {
-        chatHistory.uiText("$sender: $text") {
+    fun setTitle(text: String) {
+        title.text(text)
+    }
+
+    fun clear() {
+        chatHistory.removeChildren()
+        title.removeChildren()
+    }
+
+    fun addMessage(message: ChatMessage) {
+        val name = if (message.role == MessageSender.PLAYER) "You" else npcName
+        chatHistory.uiText("$name: ${message.text}") {
             width = 380.0
         }
     }
 
-    private fun sendMessage(message: String) {
-        addMessage("You", message)
-        
-        // Use the views' coroutine scope to call the suspend function
-        stage?.launch {
-            val response = mockNpcChat(message) 
-            addMessage(npcName, response)
-        }
-    }
-
-    // Replace this with your actual NPC suspend function
-    private suspend fun mockNpcChat(msg: String): String {
-        kotlinx.coroutines.delay(500) // Simulate "thinking"
-        return "I heard you say '$msg'. What of it?"
-    }
 }

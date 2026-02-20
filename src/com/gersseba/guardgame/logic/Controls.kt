@@ -1,32 +1,35 @@
 package com.gersseba.guardgame.logic
 
+import com.gersseba.guardgame.chat.ChatManager
 import com.gersseba.guardgame.models.World
-import com.gersseba.guardgame.ui.ChatBox
+import com.gersseba.guardgame.models.common.Chattable
+import com.gersseba.guardgame.models.common.Interactable
 import korlibs.event.Key
 import korlibs.korge.input.keys
 import korlibs.korge.view.View
-import korlibs.korge.view.visible
 
 class Controls {
 
-    fun registerKeyPress(stage: View, chatUI : ChatBox, world: World) {
+    fun registerKeyPress(stage: View, chatManager: ChatManager, world: World) {
 
         stage.keys {
             down(Key.UP) { world.player.y -= 1.0 }
             down(Key.DOWN) { world.player.y += 1.0 }
             down(Key.LEFT) { world.player.x -= 1.0 }
             down(Key.RIGHT) { world.player.x += 1.0 }
-            down(Key.E) { interact(world, chatUI) }
-            down(Key.ESCAPE) { chatUI.visible(false) }
+            down(Key.E) { interact(world, chatManager) }
         }
     }
 
-    fun interact(world: World, chatUi: ChatBox) {
+    fun interact(world: World, chatManager: ChatManager) {
         world.findClosestNonPlayerModel()
             ?.takeIf { it.isCloseTo(world.player) }
             ?.let { nearbyNpc ->
-                if (nearbyNpc != null && !chatUi.visible) {
-                    chatUi.visible(true)
+                if (nearbyNpc is Chattable) {
+                    chatManager.startConversation(nearbyNpc, nearbyNpc.name)
+                } else if (nearbyNpc is Interactable) {
+                    val result = nearbyNpc.interact(world.player)
+                    println(result)
                 }
             }
     }

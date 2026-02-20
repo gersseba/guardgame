@@ -1,6 +1,10 @@
 package com.gersseba.guardgame.models
 
-class Door(x: Double, y: Double, var isSafe: Boolean) : BaseModel(x,y) {
+import com.gersseba.guardgame.models.common.Interactable
+
+class Door(x: Double, y: Double, var isSafe: Boolean,
+           override val name: String
+) : BaseModel(x,y), Interactable {
 
     fun open(): String {
         return if (isSafe) {

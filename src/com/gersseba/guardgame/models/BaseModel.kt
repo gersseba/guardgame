@@ -1,6 +1,9 @@
 package com.gersseba.guardgame.models
 
-open class BaseModel(var x: Double, var y: Double)  {
+import com.gersseba.guardgame.models.common.Chat
+
+abstract class BaseModel(var x: Double, var y: Double)  {
+    abstract val name: String
 
     fun isCloseTo(other: BaseModel, threshold: Double = 2.0): Boolean {
         val distance = Math.sqrt(Math.pow(x - other.x, 2.0) + Math.pow(y - other.y, 2.0))
